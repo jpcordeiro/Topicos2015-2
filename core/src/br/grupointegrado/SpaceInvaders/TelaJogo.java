@@ -1,6 +1,8 @@
 package br.grupointegrado.SpaceInvaders;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
@@ -51,6 +53,12 @@ public class TelaJogo extends TelaBase{
     private Array<Texture> texturasExplosao = new Array<Texture>();
     private Array<Explosao> explosoes = new Array<Explosao>();
 
+
+    private Sound somTiro;
+    private Sound somExplosao;
+    private Sound somGameOver;
+    private Music musicaFundo;
+
     /**
      * construtor padrão da tela de jogo
      * @param game referencia para a classe principal
@@ -69,11 +77,20 @@ public class TelaJogo extends TelaBase{
         palco = new Stage(new FillViewport(camera.viewportWidth, camera.viewportHeight, camera));
         palcoInfomacoes = new Stage(new FillViewport(camera.viewportWidth, camera.viewportHeight, camera));
 
+        initSons();
         initFonte();
         initInformacoes();
 		initJogador();
         initTexturas();
 
+    }
+
+    private void initSons() {
+        somTiro = Gdx.audio.newSound(Gdx.files.internal("sounds/shoot.mp3"));
+        somExplosao = Gdx.audio.newSound(Gdx.files.internal("sounds/explosion.mp3"));
+        somGameOver = Gdx.audio.newSound(Gdx.files.internal("sounds/gameover.mp3"));
+        musicaFundo = Gdx.audio.newMusic(Gdx.files.internal("sounds/background.mp3"));
+        musicaFundo.setLooping(true);
     }
 
     private void initTexturas() {
@@ -146,6 +163,8 @@ public class TelaJogo extends TelaBase{
 
         atualizarExplosoes(delta);
         if (gameover == false) {
+            if(!musicaFundo.isPlaying())// se a musica nao estiver tocando
+                musicaFundo.play(); // iniciar musica
             capturaTeclas();
             atualizarJogador(delta);
             atualizarTiros(delta);
@@ -153,6 +172,9 @@ public class TelaJogo extends TelaBase{
             detectarColisoes(meteoros1, 5);
             detectarColisoes(meteoros2, 15);
 
+        }else{
+            if (musicaFundo.isPlaying()) //se a musica esta tocando
+                musicaFundo.stop(); //paar musica
         }
 
 
@@ -199,7 +221,7 @@ public class TelaJogo extends TelaBase{
                     tiros.removeValue(tiro, true); //remove da lista
                     meteoro.remove(); //remove do palco
                     meteoros.removeValue(meteoro, true); //remove da lista
-                    criarExplosao(meteoro.getX(), meteoro.getY());
+                    criarExplosao(meteoro.getX() + meteoro.getWidth() / 2, meteoro.getY() + meteoro.getHeight() / 2);
                 }
 
             }
@@ -207,6 +229,7 @@ public class TelaJogo extends TelaBase{
             if (recJogado.overlaps(recMeteoro)){
                 //ocorre colisao com meteoro1
                 gameover = true;
+                somGameOver.play();
             }
         }
 
@@ -219,11 +242,12 @@ public class TelaJogo extends TelaBase{
      */
     private void criarExplosao(float x, float y) {
         Image ator = new Image(texturasExplosao.get(0));
-        ator.setPosition(x, y);
+        ator.setPosition(x - ator.getWidth() / 2, y - ator.getHeight() /2);
         palco.addActor(ator);
 
         Explosao explosao = new Explosao(ator, texturasExplosao);
         explosoes.add(explosao);
+        somExplosao.play();
 
     }
 
@@ -290,6 +314,7 @@ public class TelaJogo extends TelaBase{
                 tiros.add(tiro);
                 palco.addActor(tiro);
                 intervaloTiros = 0;
+                somTiro.play();
             }
 
         }
@@ -432,6 +457,10 @@ public class TelaJogo extends TelaBase{
         for (Texture text : texturasExplosao){
             text.dispose();
         }
+        somExplosao.dispose();
+        somTiro.dispose();
+        somGameOver.dispose();
+        musicaFundo.dispose();
 
 
     }
