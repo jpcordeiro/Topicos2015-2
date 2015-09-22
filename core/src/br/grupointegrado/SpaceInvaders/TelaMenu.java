@@ -54,7 +54,7 @@ public class TelaMenu extends TelaBase{
 
     private void initBotoes() {
         texturaBotao = new Texture("buttons/button.png");
-        TexturaBotaoPressionado = new Texture("buttons/Button-down.png");
+        TexturaBotaoPressionado = new Texture("buttons/button-down.png");
 
         ImageTextButton.ImageTextButtonStyle estilo = new ImageTextButton.ImageTextButtonStyle();
         estilo.font = fonteBotoes;
